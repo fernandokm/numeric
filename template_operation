@@ -1,0 +1,3 @@
+func (lhs <INTERFACE>) <OP>(rhs Numeric) Numeric {
+	return lhs + <INTERFACE>(rhs.As<PASCAL_UNDERLYING>())
+}
