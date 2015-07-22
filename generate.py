@@ -15,14 +15,11 @@ def template(name, **kwargs):
     return str
 
 def save_list(name, list):
-    with open(name + '.go', 'w') as f:
+    with open('generated_' + name + '.go', 'w') as f:
         f.write('package ' + package + '\n')
         f.write(''.join(list))
 
 templates = dict()
-
-all_operations = []
-all_conversions = []
 
 types = [
     ('uint32', 'UInt32'),
@@ -39,16 +36,28 @@ interfaces = {
     'Float': 'Float64'
 }
 
-operations = ['Add', 'Subtract', 'Multiply', 'Divide']
+operations = {
+    'Add': '+',
+    'Subtract': '-',
+    'Multiply': '*',
+    'Divide': '/',
+}
+
+all_operations = []
+all_conversions = []
+all_unary_operations = []
 
 for interface, underlying in interfaces.items():
-    for op in operations:
-        all_operations.append(template('operation', interface=interface, op=op,
-                              pascal_underlying=underlying))
+    for op_name, op_symbol in operations.items():
+        all_operations.append(template('operation', interface=interface,
+                              op_name=op_name, op_symbol=op_symbol,
+                              pascal_underlying=underlying, return_type='Numeric'))
     for camel, pascal in types:
         all_conversions.append(template('conversion', interface=interface,
                                pascal_underlying=underlying, pascal_type=pascal,
                                camel_type=camel))
+    all_unary_operations.append(template('unary_operations', interface=interface))
 
 save_list('operations', all_operations)
 save_list('conversions', all_conversions)
+save_list('unary_operations', all_unary_operations)

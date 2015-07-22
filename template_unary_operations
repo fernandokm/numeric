@@ -1,0 +1,9 @@
+func (n <INTERFACE>) Negate() Numeric {
+	return -n
+}
+func (n <INTERFACE>) Zero() Numeric {
+	return <INTERFACE>(0)
+}
+func (n <INTERFACE>) One() Numeric {
+	return <INTERFACE>(1)
+}
