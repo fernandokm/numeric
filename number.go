@@ -1,3 +1,5 @@
+// +build false
+
 package numeric
 
 type Number struct {
