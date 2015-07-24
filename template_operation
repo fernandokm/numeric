@@ -1,3 +1,0 @@
-func (lhs <INTERFACE>) <OP_NAME>(rhs Numeric) <RETURN_TYPE> {
-	return lhs <OP_SYMBOL> <INTERFACE>(rhs.As<PASCAL_UNDERLYING>())
-}

@@ -1,3 +1,0 @@
-func (n <INTERFACE>) As<PASCAL_TYPE>() <CAMEL_TYPE> {
-	return <CAMEL_TYPE>(n)
-}
