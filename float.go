@@ -41,7 +41,7 @@ func (n Float) BigRat() *big.Rat {
 	return new(big.Rat).SetFloat64(float64(n))
 }
 
-func (n Float) Compare(rhs Numeric) int {
+func (n Float) CompareTo(rhs Numeric) int {
 	r := Float(rhs.Float64())
 	if n > r {
 		return 1

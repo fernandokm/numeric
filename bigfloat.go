@@ -48,7 +48,7 @@ func (n *BigFloat) BigRat() *big.Rat {
 	return rat
 }
 
-func (n *BigFloat) Compare(rhs Numeric) int {
+func (n *BigFloat) CompareTo(rhs Numeric) int {
 	r := rhs.BigRat()
 	return r.Sub((*big.Rat)(n), r).Sign()
 }

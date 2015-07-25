@@ -14,7 +14,7 @@ type Numeric interface {
 	Divide(rhs Numeric) Numeric
 	Float64() float64
 	BigRat() *big.Rat
-	Compare(rhs Numeric) int
+	CompareTo(rhs Numeric) int
 	ShouldPromote() bool
 	Promote() Numeric
 }
