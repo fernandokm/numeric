@@ -24,17 +24,20 @@ func (n *BigFloat) Add(rhs Numeric) Numeric {
 
 func (n *BigFloat) Subtract(rhs Numeric) Numeric {
 	rat := rhs.BigRat()
-	return (*BigFloat)(rat.Sub(rat, (*big.Rat)(n)))
+	// return (*BigFloat)(((*big.Rat)(n)).Sub((*big.Rat)(n), rat))
+	return (*BigFloat)(rat.Sub((*big.Rat)(n), rat))
 }
 
 func (n *BigFloat) Multiply(rhs Numeric) Numeric {
 	rat := rhs.BigRat()
+	// return (*BigFloat)(((*big.Rat)(n)).Mul((*big.Rat)(n), rat))
 	return (*BigFloat)(rat.Mul(rat, (*big.Rat)(n)))
 }
 
 func (n *BigFloat) Divide(rhs Numeric) Numeric {
 	rat := rhs.BigRat()
-	return (*BigFloat)(rat.Quo(rat, (*big.Rat)(n)))
+	// return (*BigFloat)(((*big.Rat)(n)).Quo((*big.Rat)(n), rat))
+	return (*BigFloat)(rat.Quo((*big.Rat)(n), rat))
 }
 
 func (n *BigFloat) Float64() float64 {
@@ -43,9 +46,10 @@ func (n *BigFloat) Float64() float64 {
 }
 
 func (n *BigFloat) BigRat() *big.Rat {
-	var rat *big.Rat
-	*rat = *n.BigRat()
-	return rat
+	// rat := new(big.Rat)
+	// *rat = big.Rat(*n)
+	// return rat
+	return new(big.Rat).Set((*big.Rat)(n))
 }
 
 func (n *BigFloat) CompareTo(rhs Numeric) int {
@@ -59,4 +63,9 @@ func (n *BigFloat) ShouldPromote() bool {
 
 func (n *BigFloat) Promote() Numeric {
 	return (*BigFloat)(n.BigRat())
+}
+
+func (n *BigFloat) String() string {
+	// TODO(fernandokm): improve this
+	return (*big.Rat)(n).FloatString(5)
 }

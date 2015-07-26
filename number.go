@@ -1,6 +1,8 @@
 package numeric
 
 import (
+	"fmt"
+	"math"
 	"math/big"
 )
 
@@ -8,7 +10,7 @@ type Number struct {
 	storage Numeric
 }
 
-func (n *Number) Negative() Number {
+func (n Number) Negative() Number {
 	storage := n.storage.Negate()
 	for storage.ShouldPromote() {
 		storage = n.storage.Promote().Negate()
@@ -20,7 +22,7 @@ func (n *Number) Negative() Number {
 // eg: BigFloat.Add(Float) = BigFloat // Good (Float promoted to BigFloat)
 //     Float.Add(BigFloat) = Float // Bad (BigFloat downcast to Float)
 
-func (n *Number) Add(rhs Number) Number {
+func (n Number) Add(rhs Number) Number {
 	storage := n.storage.Add(rhs.storage)
 	for storage.ShouldPromote() {
 		storage = n.storage.Promote().Add(rhs.storage)
@@ -28,7 +30,7 @@ func (n *Number) Add(rhs Number) Number {
 	return Number{storage}
 }
 
-func (n *Number) Subtract(rhs Number) Number {
+func (n Number) Subtract(rhs Number) Number {
 	storage := n.storage.Subtract(rhs.storage)
 	for storage.ShouldPromote() {
 		storage = n.storage.Promote().Subtract(rhs.storage)
@@ -36,7 +38,7 @@ func (n *Number) Subtract(rhs Number) Number {
 	return Number{storage}
 }
 
-func (n *Number) Multiply(rhs Number) Number {
+func (n Number) Multiply(rhs Number) Number {
 	storage := n.storage.Multiply(rhs.storage)
 	for storage.ShouldPromote() {
 		storage = n.storage.Promote().Multiply(rhs.storage)
@@ -44,7 +46,7 @@ func (n *Number) Multiply(rhs Number) Number {
 	return Number{storage}
 }
 
-func (n *Number) Divide(rhs Number) Number {
+func (n Number) Divide(rhs Number) Number {
 	storage := n.storage.Divide(rhs.storage)
 	for storage.ShouldPromote() {
 		storage = n.storage.Promote().Divide(rhs.storage)
@@ -52,37 +54,41 @@ func (n *Number) Divide(rhs Number) Number {
 	return Number{storage}
 }
 
-func (n *Number) CompareTo(rhs Number) int {
+func (n Number) CompareTo(rhs Number) int {
 	return n.storage.CompareTo(rhs.storage)
 }
 
-func (n *Number) EqualTo(rhs Number) bool {
+func (n Number) Equals(rhs Number) bool {
 	return n.CompareTo(rhs) == 0
 }
 
-func (n *Number) Int() int {
+func (n Number) Int() int {
 	return int(n.Int64())
 }
 
-func (n *Number) Int64() int64 {
+func (n Number) Int64() int64 {
 	return int64(n.storage.Float64())
 }
 
-func (n *Number) Float64() float64 {
+func (n Number) Float64() float64 {
 	return n.storage.Float64()
 }
 
-func (n *Number) BigInt() *big.Int {
+func (n Number) BigInt() *big.Int {
 	rat := n.BigRat()
 	num, denom := rat.Num(), rat.Denom()
 	return num.Div(num, denom)
 }
 
-func (n *Number) BigRat() *big.Rat {
+func (n Number) BigRat() *big.Rat {
 	return n.storage.BigRat()
 }
 
-func SafeFrom(value interface{}) (number Number, err error) {
+func (n Number) String() string {
+	return n.storage.String()
+}
+
+func NewNumberSafe(value interface{}) (number Number, err error) {
 	var n Numeric
 	switch v := value.(type) {
 	case int8:
@@ -121,13 +127,16 @@ func SafeFrom(value interface{}) (number Number, err error) {
 	case Number:
 		return v, nil
 	default:
-		return Number{}, ConversionError{value}
+		return Number{}, fmt.Errorf("Unrecognized value %+v of type %T", v, v)
+	}
+	if n == Float(math.Inf(1)) || n == Float(math.Inf(-1)) {
+		return Number{}, fmt.Errorf("Infinity is not a number!")
 	}
 	return Number{n}, nil
 }
 
-func From(value interface{}) Number {
-	n, err := SafeFrom(value)
+func NewNumber(value interface{}) Number {
+	n, err := NewNumberSafe(value)
 	if err != nil {
 		panic(err.Error())
 	}

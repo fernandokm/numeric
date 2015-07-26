@@ -17,6 +17,7 @@ type Numeric interface {
 	CompareTo(rhs Numeric) int
 	ShouldPromote() bool
 	Promote() Numeric
+	String() string
 }
 
 type Float float64

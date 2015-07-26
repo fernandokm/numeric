@@ -3,6 +3,7 @@ package numeric
 import (
 	"math"
 	"math/big"
+	"strconv"
 )
 
 func (n Float) Zero() Numeric {
@@ -57,4 +58,8 @@ func (n Float) ShouldPromote() bool {
 
 func (n Float) Promote() Numeric {
 	return (*BigFloat)(n.BigRat())
+}
+
+func (n Float) String() string {
+	return strconv.FormatFloat(float64(n), 'g', -1, 64)
 }
