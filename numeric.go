@@ -16,7 +16,7 @@ import (
 // To compare two Numeric values, the method CompareTo() should be called.
 // For inputs x and y, it should return:
 //		x.CompareTo(y)
-//      // 0 if x == y
+//			// 0 if x == y
 //			// 1 if x > y
 //			// -1 if x < y
 // The available conversion methods are Float64() and BigRat().
