@@ -44,9 +44,5 @@ NewNumberSafe() will return an error and NewNumber() will panic.
     handleError(err)
   }
 
-
-Invalid Numbers
-
-Invalid numbers include values of non-numeric types and +/-Infinity.
 */
 package numeric

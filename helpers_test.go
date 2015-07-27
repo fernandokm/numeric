@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+func firstArg(x, y interface{}) interface{} {
+	return x
+}
+
 func equals(x, y interface{}) bool {
 	return x == y
 }

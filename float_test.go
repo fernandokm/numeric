@@ -20,11 +20,11 @@ var (
 	nan    = math.NaN()
 )
 
-func TestFloatLiterals(t *testing.T) {
+func TestFloatNew(t *testing.T) {
 	f0 := Float(0)
-	f1 := Float(1)
-	assertEquals(f0, f0.Zero(), t)
-	assertEquals(f1, f0.One(), t)
+	f15 := Float(15)
+	assertEquals(f0, f15.New(0), t)
+	assertEquals(f15, f0.New(15), t)
 }
 
 func TestFloatOp_Negate(t *testing.T) {
@@ -57,15 +57,17 @@ func TestFloatOp_Divide(t *testing.T) {
 }
 
 func TestFloatConv_Float(t *testing.T) {
-	assertEquals(15.0, Float(15.0).Float64(), t)
-	assertEquals(-7.2, Float(-7.2).Float64(), t)
-	assertEquals(27.9, Float(27.9).Float64(), t)
+	assertEquals(15.0, firstArg(Float(15.0).Float64()), t)
+	assertEquals(-7.2, firstArg(Float(-7.2).Float64()), t)
+	assertEquals(27.9, firstArg(Float(27.9).Float64()), t)
 }
 
 func TestFloatConv_BigRat(t *testing.T) {
-	assertEquals(bigRat(15), Float(15).BigRat(), t)
-	assertEquals(bigRat(-7.2), Float(-7.2).BigRat(), t)
-	assertEquals(bigRat(27.9), Float(27.9).BigRat(), t)
+	assertEquals(bigRat(15), firstArg(Float(15).BigRat()), t)
+	assertEquals(bigRat(-7.2), firstArg(Float(-7.2).BigRat()), t)
+	assertEquals(bigRat(27.9), firstArg(Float(27.9).BigRat()), t)
+	_, err := Float(math.Inf(1)).Float64()
+	assert(err == nil, "err should be nil", t)
 }
 
 func TestFloatComparison(t *testing.T) {
@@ -79,8 +81,8 @@ func TestFloatComparison(t *testing.T) {
 func TestFloatPromotion_ShouldPromote(t *testing.T) {
 	assert(Float(posInf).ShouldPromote(), "Float(+infinity).ShouldPromote() should be true", t)
 	assert(Float(negInf).ShouldPromote(), "Float(-infinity).ShouldPromote() should be true", t)
+	assert(Float(nan).ShouldPromote(), "Float(nan).ShouldPromote() should be true", t)
 
-	assert(!Float(nan).ShouldPromote(), "Float(nan).ShouldPromote() should be false", t)
 	assert(!Float(7.0).ShouldPromote(), "Float(7.0).ShouldPromote() should be false", t)
 }
 

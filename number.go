@@ -1,13 +1,15 @@
 package numeric
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/big"
 )
 
 // Number stores a numeric value
-// using as its underlying storage a value implementing the Numeric interface.
+// using a Numeric type as its underlying storage.
+// It can be created through the NewNumber and NewNumberSafe methods.
 type Number struct {
 	storage Numeric
 }
@@ -21,10 +23,6 @@ func (n Number) Negative() Number {
 	}
 	return Number{storage}
 }
-
-// TODO(fernandokm): avoid downcasting types in binary operations???
-// eg: BigFloat.Add(Float) = BigFloat // Good (Float promoted to BigFloat)
-//     Float.Add(BigFloat) = Float // Bad (BigFloat downcast to Float)
 
 // Add returns a Number that is the sum of n and rhs
 // and automatically promotes it if required.
@@ -80,34 +78,41 @@ func (n Number) Equals(rhs Number) bool {
 	return n.CompareTo(rhs) == 0
 }
 
-// TODO(fernandokm): document behavior when overflow happens on conversions on Number and other Numeric types.
-//                   document rounding behavior on Int(), Int64() and BigInt()
-
-// Int returns an int with the value of n.
-func (n Number) Int() int {
-	return int(n.Int64())
-}
-
 // Int64 returns an int64 with the value of n.
-func (n Number) Int64() int64 {
-	return int64(n.storage.Float64())
+// If n cannot be represented as an int64, an error will be returned
+// and the result of Int64() will be a sensible attempt to represent n.
+func (n Number) Int64() (int64, error) {
+	f, err := n.storage.Float64()
+	val := int64(f)
+	if f > math.MaxInt64 {
+		val = math.MaxInt64
+		err = errors.New("Value too large")
+	} else if f < math.MinInt64 {
+		val = math.MinInt64
+		err = errors.New("Value too small")
+	}
+	return val, err
 }
 
 // Float64 returns a float64 with the value of n.
+// If the value is invalid, too large or too small,
+// the values NaN and +/-Infinity may be returned.
 func (n Number) Float64() float64 {
-	return n.storage.Float64()
+	f, _ := n.storage.Float64()
+	return f
 }
 
-// BigInt returns a big.Int with the value of n.
+// BigInt returns a *big.Int with the value of n.
 func (n Number) BigInt() *big.Int {
 	rat := n.BigRat()
 	num, denom := rat.Num(), rat.Denom()
-	return num.Div(num, denom)
+	return num.Quo(num, denom)
 }
 
 // BigRat returns a big.Rat with the value of n.
 func (n Number) BigRat() *big.Rat {
-	return n.storage.BigRat()
+	r, _ := n.storage.BigRat()
+	return r
 }
 
 // String returns a string representation of n.
@@ -115,9 +120,7 @@ func (n Number) String() string {
 	return n.storage.String()
 }
 
-//TODO(fernandokm): disallow NaN and stop +/-inf and nan values from being created in Float
-
-// NewNumberSafe attempts to convert value to a Number and returns an error if it failed.
+// NewNumberSafe attempts to convert a value to a Number and returns an error if it fails.
 func NewNumberSafe(value interface{}) (number Number, err error) {
 	var n Numeric
 	switch v := value.(type) {
@@ -159,13 +162,10 @@ func NewNumberSafe(value interface{}) (number Number, err error) {
 	default:
 		return Number{}, fmt.Errorf("Unrecognized value %+v of type %T", v, v)
 	}
-	if n == Float(math.Inf(1)) || n == Float(math.Inf(-1)) {
-		return Number{}, fmt.Errorf("Infinity is not a number!")
-	}
 	return Number{n}, nil
 }
 
-// NewNumber attempts to convert value to a Number and panics if it failed.
+// NewNumber attempts to convert a value to a Number and panics if it fails.
 func NewNumber(value interface{}) Number {
 	n, err := NewNumberSafe(value)
 	if err != nil {
